@@ -1,9 +1,13 @@
 package:
   name: choose
   dependencies:
-    - console
+    - arrays
     - effect
+    - foldable-traversable
+    - halogen
+    - maybe
     - prelude
+    - random
 workspace:
   packageSet:
     registry: 81.1.0
