@@ -1,0 +1,10 @@
+package:
+  name: choose
+  dependencies:
+    - console
+    - effect
+    - prelude
+workspace:
+  packageSet:
+    registry: 81.1.0
+  extraPackages: {}
