@@ -8,7 +8,7 @@ import Prelude
 import Data.Array (snoc, mapWithIndex, deleteAt, (!!), modifyAt)
 import Data.Either (Either(Left, Right), note)
 import Data.Foldable (length, oneOfMap)
-import Data.Maybe (Maybe(Just, Nothing), fromMaybe)
+import Data.Maybe (Maybe(Just, Nothing))
 import Data.Ordering (Ordering(EQ, LT, GT))
 import Effect (Effect)
 import Effect.Class (class MonadEffect, liftEffect)
