@@ -2,11 +2,12 @@ module Main where
 
 import Prelude
     ( Unit
-    , pure, unit, bind, const, compare
-    , (==), ($), (>>=), (-), (<$>)
+    , pure, unit, bind, const, compare, discard
+    , (==), ($), (>>=), (-), (<$>), (<>), (<<<), (>=)
     )
 import Data.Array (snoc, mapWithIndex, deleteAt, (!!), modifyAt)
-import Data.Foldable (length)
+import Data.Either (Either(Left, Right), note)
+import Data.Foldable (length, oneOfMap)
 import Data.Maybe (Maybe(Just, Nothing), fromMaybe)
 import Data.Ordering (Ordering(EQ, LT, GT))
 import Effect (Effect)
@@ -30,6 +31,7 @@ type State =
     , newItem :: String
     , newName :: Maybe String
     , selectedItem :: Maybe Int
+    , latestError :: Maybe String
     }
 
 newList :: List
@@ -45,6 +47,7 @@ initialState =
     , newItem : ""
     , newName : Nothing
     , selectedItem : Nothing
+    , latestError : Nothing
     }
 
 data Action
@@ -60,6 +63,7 @@ data Action
     | ConfirmRename
     | CancelRename
     | DeleteList Int
+    | DismissError
 
 renderList :: forall m. Int -> String -> H.ComponentHTML Action () m
 renderList index name = HH.div
@@ -149,78 +153,149 @@ renderItems state = case mlist of
             index <- state.selectedList
             state.lists !! index
 
+renderError :: forall m. String -> H.ComponentHTML Action () m
+renderError e = HH.div
+    [ HP.id "error"
+    , HE.onClick $ const DismissError
+    ] [ HH.text $ "Error: " <> e ]
+
 render :: forall m. State -> H.ComponentHTML Action () m
-render state = HH.div [ HP.id "main" ]
+render state = HH.div [ HP.id "main" ] $
     [ renderLists state.lists
     , renderItems state
-    ]
+    ] <> oneOfMap (pure <<< renderError) state.latestError
 
 handleAction :: forall q m. MonadEffect m =>
     Action -> H.HalogenM State Action () q m Unit
 handleAction None = pure unit
-handleAction AddItem = H.modify_ $ \state -> state
-    { lists = fromMaybe state.lists $ do
-        index <- state.selectedList
-        modifyAt index
-            (\list -> list { items = list.items `snoc` state.newItem })
-            state.lists
-    , newItem = ""
-    }
+handleAction AddItem = H.modify_ $ \state ->
+    case do
+        index <- note "Cannot add item, no list selected" state.selectedList
+        note "Cannot add item, selected list index out of range" $
+            modifyAt
+                index
+                (\list -> list { items = list.items `snoc` state.newItem })
+                state.lists
+    of
+        Left e -> state { latestError = Just e }
+        Right newLists -> state
+            { lists = newLists
+            , newItem = ""
+            , latestError = Nothing
+            }
 handleAction (ChangeNew s) = H.modify_ $ _ { newItem = s }
-handleAction (DeleteItem itemIndex) = H.modify_ $ \state -> state
-    { lists = fromMaybe state.lists $ do
-        listIndex <- state.selectedList
-        oldList <- state.lists !! listIndex
-        newItems <- deleteAt itemIndex oldList.items
-        modifyAt listIndex (_ { items = newItems }) state.lists
-    }
+handleAction (DeleteItem itemIndex) = H.modify_ $ \state ->
+    case do
+        listIndex <- note "Cannot delete item, no list selected"
+            state.selectedList
+        oldList <- note "Cannot delete item, selected list index out of range" $
+            state.lists !! listIndex
+        newItems <- note "Cannot delete item, selected item index out of range" $
+            deleteAt itemIndex oldList.items
+        note "Cannot delete item, selected list index out of range" $
+            modifyAt listIndex (_ { items = newItems }) state.lists
+    of
+        Left e -> state { latestError = Just e }
+        Right newLists -> state
+            { lists = newLists
+            , latestError = Nothing
+            }
 handleAction Choose = do
     state <- H.get
-    let
-        listLen = do
-            index <- state.selectedList
-            list <- state.lists !! index
-            if length list.items == 0 then Nothing else Just (length list.items)
-    case listLen of
-        Nothing -> pure unit
-        Just n -> do
+    case do
+        index <- note "Cannot choose item, no list selected" state.selectedList
+        list <- note "Cannot choose item, selected list index out of range" $
+            state.lists !! index
+        if length list.items == 0 then
+            Left "Cannot choose item, list is empty"
+        else
+            pure $ length list.items
+    of
+        Left e -> H.modify_ $ _ { latestError = Just e }
+        Right n -> do
             i <- liftEffect $ randomInt 0 (n - 1)
-            H.modify_ $ _ { selectedItem = Just i }
-handleAction (SwitchList index) = H.modify_ $ _
-    { selectedList = Just index
-    , selectedItem = Nothing
-    , newName = Nothing
-    }
+            H.modify_ $ _
+                { selectedItem = Just i
+                , latestError = Nothing
+                }
+handleAction (SwitchList index) = H.modify_ $ \state ->
+    if index >= length state.lists then
+        state
+            { latestError = Just "Could not switch to list, index out of range" }
+    else
+        state
+            { selectedList = Just index
+            , selectedItem = Nothing
+            , newName = Nothing
+            , latestError = Nothing
+            }
 handleAction NewList = H.modify_ $ \state -> state
     { lists = state.lists `snoc` newList
     , selectedList = Just $ length state.lists
     , newItem = ""
     , newName = Nothing
     , selectedItem = Nothing
+    , latestError = Nothing
     }
-handleAction OpenRename = H.modify_ $ \state -> state
-    { newName = do
-        index <- state.selectedList
-        list <- state.lists !! index
+handleAction OpenRename = H.modify_ $ \state ->
+    case do
+        case state.newName of
+            Just _ -> Left "Cannot begin rename, rename already in progress!"
+            Nothing -> Right unit
+        index <- note "Cannot begin rename, no list selected" state.selectedList
+        list <- note "Cannot begin rename, selected list index out of range" $
+            state.lists !! index
         pure list.name
-    }
-handleAction (ChangeName new) = H.modify_ $ _ { newName = Just new }
-handleAction ConfirmRename = H.modify_ $ \state -> state
-    { lists = fromMaybe state.lists $ do
-        index <- state.selectedList
-        newName <- state.newName
-        modifyAt index (_ { name = newName }) state.lists
-    , newName = Nothing
-    }
-handleAction CancelRename = H.modify_ $ _ { newName = Nothing }
-handleAction (DeleteList index) = H.modify_ $ \state -> state
-    { lists = fromMaybe state.lists $ deleteAt index state.lists
-    , selectedList = case compare index <$> state.selectedList of
-        Nothing -> Nothing
-        Just EQ -> Nothing
-        Just LT -> (_ - 1) <$> state.selectedList
-        Just GT -> state.selectedList
-    }
+    of
+        Left e -> state { latestError = Just e }
+        Right name -> state
+            { newName = Just name
+            , latestError = Nothing
+            }
+handleAction (ChangeName new) = H.modify_ $ \state ->
+    case state.newName of
+        Nothing -> state
+            { latestError = Just "Cannot change name, rename has not begun" }
+        Just _ -> state { newName = Just new }
+handleAction ConfirmRename = H.modify_ $ \state ->
+    case do
+        index <- note "Cannot confirm rename, no list selected"
+            state.selectedList
+        newName <- note "Cannot confirm rename, rename not started"
+            state.newName
+        note "Cannot confirm rename, selected list index out of range" $
+            modifyAt index (_ { name = newName }) state.lists
+    of
+        Left e -> state { latestError = Just e }
+        Right newLists -> state
+            { lists = newLists
+            , newName = Nothing
+            , latestError = Nothing
+            }
+handleAction CancelRename = H.modify_ $ \state ->
+    case state.newName of
+        Nothing -> state
+            { latestError = Just "Cannot cancel rename, rename has not begun " }
+        Just _ -> state
+            { newName = Nothing
+            , latestError = Nothing
+            }
+handleAction (DeleteList index) = H.modify_ $ \state ->
+    case
+        note "Cannot delete list, index out of range" $
+            deleteAt index state.lists
+    of
+        Left e -> state { latestError = Just e }
+        Right newLists -> state
+            { lists = newLists
+            , selectedList = case compare index <$> state.selectedList of
+                Nothing -> Nothing
+                Just EQ -> Nothing
+                Just LT -> (_ - 1) <$> state.selectedList
+                Just GT -> state.selectedList
+            , latestError = Nothing
+            }
+handleAction DismissError = H.modify_ $ _ { latestError = Nothing }
 
 
 component :: forall q m. MonadEffect m => H.Component q State Action m
