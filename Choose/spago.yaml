@@ -1,13 +1,16 @@
 package:
   name: choose
   dependencies:
+    - argonaut-core
     - arrays
     - effect
     - foldable-traversable
+    - foreign-object
     - halogen
     - maybe
     - prelude
     - random
+    - web-storage
 workspace:
   packageSet:
     registry: 81.1.0

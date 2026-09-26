@@ -5,13 +5,16 @@
         "path": "./",
         "core": {
           "dependencies": [
+            "argonaut-core",
             "arrays",
             "effect",
             "foldable-traversable",
+            "foreign-object",
             "halogen",
             "maybe",
             "prelude",
-            "random"
+            "random",
+            "web-storage"
           ]
         },
         "test": {
@@ -697,6 +700,24 @@
         "tailrec",
         "transformers",
         "unsafe-coerce"
+      ]
+    },
+    "argonaut-core": {
+      "type": "registry",
+      "version": "7.0.0",
+      "integrity": "sha256-gYZihtBIKthVuXXoiPphMookSf8M5aHyFYkcIWqlxTM=",
+      "dependencies": [
+        "arrays",
+        "control",
+        "either",
+        "foreign-object",
+        "functions",
+        "gen",
+        "maybe",
+        "nonempty",
+        "prelude",
+        "strings",
+        "tailrec"
       ]
     },
     "arrays": {

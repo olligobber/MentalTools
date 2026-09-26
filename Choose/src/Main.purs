@@ -2,23 +2,32 @@ module Main where
 
 import Prelude
     ( Unit
-    , pure, unit, bind, const, compare, discard
-    , (==), ($), (>>=), (-), (<$>), (<>), (<<<), (>=)
+    , pure, unit, bind, const, compare, discard, identity
+    , (==), ($), (>>=), (-), (<$>), (<>), (<<<), (>=), (<)
     )
+import Data.Argonaut.Core as AC
+import Data.Argonaut.Parser as AP
 import Data.Array (snoc, mapWithIndex, deleteAt, (!!), modifyAt)
 import Data.Either (Either(Left, Right), note)
 import Data.Foldable (length, oneOfMap)
+import Data.Int (fromNumber, toNumber)
 import Data.Maybe (Maybe(Just, Nothing))
 import Data.Ordering (Ordering(EQ, LT, GT))
+import Data.Traversable (traverse)
+import Data.Tuple (Tuple(Tuple))
 import Effect (Effect)
 import Effect.Class (class MonadEffect, liftEffect)
 import Effect.Random (randomInt)
+import Foreign.Object as O
 import Halogen as H
 import Halogen.Aff as HA
 import Halogen.HTML as HH
 import Halogen.HTML.Events as HE
 import Halogen.HTML.Properties as HP
 import Halogen.VDom.Driver (runUI)
+import Web.HTML (window)
+import Web.HTML.Window (localStorage)
+import Web.Storage.Storage (getItem, setItem)
 
 type List =
     { name :: String
@@ -33,6 +42,60 @@ type State =
     , selectedItem :: Maybe Int
     , latestError :: Maybe String
     }
+
+save :: State -> String
+save state = AC.stringify $ AC.fromObject $ O.fromFoldable $
+    [ Tuple "version" $ AC.fromNumber 1.0
+    , Tuple "lists" $ AC.fromArray $ (\list -> AC.fromObject $ O.fromFoldable
+        [ Tuple "name" $ AC.fromString list.name
+        , Tuple "items" $ AC.fromArray $ AC.fromString <$> list.items
+        ] ) <$> state.lists
+    ] <> oneOfMap
+        (pure <<< Tuple "selectedList" <<< AC.fromNumber <<< toNumber)
+        state.selectedList
+
+load :: String -> State
+load jsonString = case do
+    json <- AP.jsonParser jsonString
+    object <- note "Json is not an object" $ AC.toObject json
+    versionJ <- note "No save version detected" $ O.lookup "version" object
+    versionN <- note "Save version is not a number" $ AC.toNumber versionJ
+    if versionN == 1.0 then pure unit else Left $ "Unsupported version number"
+    listsJ <- note "Lists not detected" $ O.lookup "lists" object
+    listsAJ <- note "Lists is not an array" $ AC.toArray listsJ
+    lists <- traverse
+        (\listJ -> do
+            listO <- note "List is not an object" $ AC.toObject listJ
+            nameJ <- note "Name of list not detected" $ O.lookup "name" listO
+            nameS <- note "Name is not a string" $ AC.toString nameJ
+            itemsJ <- note "Items not detected" $ O.lookup "items" listO
+            itemsAJ <- note "Items is not an array" $ AC.toArray itemsJ
+            itemsAS <- traverse
+                (note "Item is not a string" <<< AC.toString)
+                itemsAJ
+            pure { name : nameS, items : itemsAS }
+        ) listsAJ
+    let selectedMJ = O.lookup "selectedList" object
+    selectedMI <- traverse
+        (\selectedJ -> do
+            selectedN <- note "Selected List is not a number" $
+                AC.toNumber selectedJ
+            selectedI <- note "Selected List is not an integer" $
+                fromNumber selectedN
+            if selectedI >= 0 then pure unit else Left $
+                "Selected List cannot be negative"
+            if selectedI < length lists then pure unit else Left $
+                "Selected List index out of range"
+            pure selectedI
+        ) selectedMJ
+    pure $ initialState
+        { lists = lists
+        , selectedList = selectedMI
+        }
+    of
+        Left e -> initialState
+            { latestError = Just $ "Error loading saved data: " <> e }
+        Right x -> x
 
 newList :: List
 newList =
@@ -165,27 +228,33 @@ render state = HH.div [ HP.id "main" ] $
     , renderItems state
     ] <> oneOfMap (pure <<< renderError) state.latestError
 
+writeState :: forall q m. MonadEffect m => H.HalogenM State Action () q m Unit
+writeState = do
+    state <- H.get
+    liftEffect $ window >>= localStorage >>= setItem "save" (save state)
+
 handleAction :: forall q m. MonadEffect m =>
     Action -> H.HalogenM State Action () q m Unit
 handleAction None = pure unit
-handleAction AddItem = H.modify_ $ \state ->
-    case do
+handleAction AddItem = do
+    H.modify_ $ \state -> case do
         index <- note "Cannot add item, no list selected" state.selectedList
         note "Cannot add item, selected list index out of range" $
             modifyAt
                 index
                 (\list -> list { items = list.items `snoc` state.newItem })
                 state.lists
-    of
-        Left e -> state { latestError = Just e }
-        Right newLists -> state
-            { lists = newLists
-            , newItem = ""
-            , latestError = Nothing
-            }
+        of
+            Left e -> state { latestError = Just e }
+            Right newLists -> state
+                { lists = newLists
+                , newItem = ""
+                , latestError = Nothing
+                }
+    writeState
 handleAction (ChangeNew s) = H.modify_ $ _ { newItem = s }
-handleAction (DeleteItem itemIndex) = H.modify_ $ \state ->
-    case do
+handleAction (DeleteItem itemIndex) = do
+    H.modify_ $ \state -> case do
         listIndex <- note "Cannot delete item, no list selected"
             state.selectedList
         oldList <- note "Cannot delete item, selected list index out of range" $
@@ -194,12 +263,13 @@ handleAction (DeleteItem itemIndex) = H.modify_ $ \state ->
             deleteAt itemIndex oldList.items
         note "Cannot delete item, selected list index out of range" $
             modifyAt listIndex (_ { items = newItems }) state.lists
-    of
-        Left e -> state { latestError = Just e }
-        Right newLists -> state
-            { lists = newLists
-            , latestError = Nothing
-            }
+        of
+            Left e -> state { latestError = Just e }
+            Right newLists -> state
+                { lists = newLists
+                , latestError = Nothing
+                }
+    writeState
 handleAction Choose = do
     state <- H.get
     case do
@@ -218,25 +288,29 @@ handleAction Choose = do
                 { selectedItem = Just i
                 , latestError = Nothing
                 }
-handleAction (SwitchList index) = H.modify_ $ \state ->
-    if index >= length state.lists then
-        state
-            { latestError = Just "Could not switch to list, index out of range" }
-    else
-        state
-            { selectedList = Just index
-            , selectedItem = Nothing
-            , newName = Nothing
-            , latestError = Nothing
-            }
-handleAction NewList = H.modify_ $ \state -> state
-    { lists = state.lists `snoc` newList
-    , selectedList = Just $ length state.lists
-    , newItem = ""
-    , newName = Nothing
-    , selectedItem = Nothing
-    , latestError = Nothing
-    }
+handleAction (SwitchList index) = do
+    H.modify_ $ \state ->
+        if index >= length state.lists then
+            state
+                { latestError = Just "Could not switch to list, index out of range" }
+        else
+            state
+                { selectedList = Just index
+                , selectedItem = Nothing
+                , newName = Nothing
+                , latestError = Nothing
+                }
+    writeState
+handleAction NewList = do
+    H.modify_ $ \state -> state
+        { lists = state.lists `snoc` newList
+        , selectedList = Just $ length state.lists
+        , newItem = ""
+        , newName = Nothing
+        , selectedItem = Nothing
+        , latestError = Nothing
+        }
+    writeState
 handleAction OpenRename = H.modify_ $ \state ->
     case do
         case state.newName of
@@ -257,21 +331,22 @@ handleAction (ChangeName new) = H.modify_ $ \state ->
         Nothing -> state
             { latestError = Just "Cannot change name, rename has not begun" }
         Just _ -> state { newName = Just new }
-handleAction ConfirmRename = H.modify_ $ \state ->
-    case do
+handleAction ConfirmRename = do
+    H.modify_ $ \state -> case do
         index <- note "Cannot confirm rename, no list selected"
             state.selectedList
         newName <- note "Cannot confirm rename, rename not started"
             state.newName
         note "Cannot confirm rename, selected list index out of range" $
             modifyAt index (_ { name = newName }) state.lists
-    of
-        Left e -> state { latestError = Just e }
-        Right newLists -> state
-            { lists = newLists
-            , newName = Nothing
-            , latestError = Nothing
-            }
+        of
+            Left e -> state { latestError = Just e }
+            Right newLists -> state
+                { lists = newLists
+                , newName = Nothing
+                , latestError = Nothing
+                }
+    writeState
 handleAction CancelRename = H.modify_ $ \state ->
     case state.newName of
         Nothing -> state
@@ -280,30 +355,36 @@ handleAction CancelRename = H.modify_ $ \state ->
             { newName = Nothing
             , latestError = Nothing
             }
-handleAction (DeleteList index) = H.modify_ $ \state ->
-    case
+handleAction (DeleteList index) = do
+    H.modify_ $ \state -> case
         note "Cannot delete list, index out of range" $
             deleteAt index state.lists
-    of
-        Left e -> state { latestError = Just e }
-        Right newLists -> state
-            { lists = newLists
-            , selectedList = case compare index <$> state.selectedList of
-                Nothing -> Nothing
-                Just EQ -> Nothing
-                Just LT -> (_ - 1) <$> state.selectedList
-                Just GT -> state.selectedList
-            , latestError = Nothing
-            }
+        of
+            Left e -> state { latestError = Just e }
+            Right newLists -> state
+                { lists = newLists
+                , selectedList = case compare index <$> state.selectedList of
+                    Nothing -> Nothing
+                    Just EQ -> Nothing
+                    Just LT -> (_ - 1) <$> state.selectedList
+                    Just GT -> state.selectedList
+                , latestError = Nothing
+                }
+    writeState
 handleAction DismissError = H.modify_ $ _ { latestError = Nothing }
-
 
 component :: forall q m. MonadEffect m => H.Component q State Action m
 component = H.mkComponent
-    { initialState: pure initialState
+    { initialState: identity
     , render
     , eval: H.mkEval $ H.defaultEval { handleAction = handleAction }
     }
 
 main :: Effect Unit
-main = HA.runHalogenAff $ HA.awaitBody >>= runUI component initialState
+main = do
+    saveString <- window >>= localStorage >>= getItem "save"
+    let
+        state = case saveString of
+            Nothing -> initialState
+            Just s -> load s
+    HA.runHalogenAff $ HA.awaitBody >>= runUI component state
