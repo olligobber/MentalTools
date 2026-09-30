@@ -7194,9 +7194,9 @@
     return stringify(id(fromFoldable4(append5([new Tuple("version", id(1)), new Tuple("lists", id(map21(function(list) {
       return id(fromFoldable4([new Tuple("name", id(list.name)), new Tuple("items", id(map21(id)(list.items)))]));
     })(state3.lists)))])(oneOfMap2(function() {
-      var $206 = Tuple.create("selectedList");
-      return function($207) {
-        return pure9($206(id(toNumber2($207))));
+      var $212 = Tuple.create("selectedList");
+      return function($213) {
+        return pure9($212(id(toNumber2($213))));
       };
     }())(state3.selectedList)))));
   };
@@ -7220,8 +7220,8 @@
     return function(index4) {
       return function(item) {
         return div2([classes(function() {
-          var $85 = eq2(selected2)(new Just(index4));
-          if ($85) {
+          var $87 = eq2(selected2)(new Just(index4));
+          if ($87) {
             return ["item", "selected"];
           }
           ;
@@ -7258,8 +7258,8 @@
     return div2([id3("error"), onClick($$const(DismissError.value))])([text5("Error: " + e)]);
   };
   var render = function(state3) {
-    return div2([id3("main")])(append5([renderLists(state3.lists), renderItems(state3)])(oneOfMap2(function($208) {
-      return pure9(renderError($208));
+    return div2([id3("main")])(append5([renderLists(state3.lists), renderItems(state3)])(oneOfMap2(function($214) {
+      return pure9(renderError($214));
     })(state3.latestError)));
   };
   var newList = {
@@ -7282,8 +7282,8 @@
         return bind32(note("No save version detected")(lookup("version")(object2)))(function(versionJ) {
           return bind32(note("Save version is not a number")(toNumber(versionJ)))(function(versionN) {
             return discard12(function() {
-              var $90 = versionN === 1;
-              if ($90) {
+              var $92 = versionN === 1;
+              if ($92) {
                 return pure13(unit);
               }
               ;
@@ -7298,9 +7298,9 @@
                           return bind32(note("Items not detected")(lookup("items")(listO)))(function(itemsJ) {
                             return bind32(note("Items is not an array")(toArray(itemsJ)))(function(itemsAJ) {
                               return bind32(traverse2(function() {
-                                var $209 = note("Item is not a string");
-                                return function($210) {
-                                  return $209(toString($210));
+                                var $215 = note("Item is not a string");
+                                return function($216) {
+                                  return $215(toString($216));
                                 };
                               }())(itemsAJ))(function(itemsAS) {
                                 return pure13({
@@ -7319,16 +7319,16 @@
                       return bind32(note("Selected List is not a number")(toNumber(selectedJ)))(function(selectedN) {
                         return bind32(note("Selected List is not an integer")(fromNumber(selectedN)))(function(selectedI) {
                           return discard12(function() {
-                            var $91 = selectedI >= 0;
-                            if ($91) {
+                            var $93 = selectedI >= 0;
+                            if ($93) {
                               return pure13(unit);
                             }
                             ;
                             return new Left("Selected List cannot be negative");
                           }())(function() {
                             return discard12(function() {
-                              var $92 = selectedI < length9(lists);
-                              if ($92) {
+                              var $94 = selectedI < length9(lists);
+                              if ($94) {
                                 return pure13(unit);
                               }
                               ;
@@ -7386,44 +7386,44 @@
         return discard23(modify_3(function(state3) {
           var v1 = bind32(note("Cannot add item, no list selected")(state3.selectedList))(function(index4) {
             return note("Cannot add item, selected list index out of range")(modifyAt(index4)(function(list) {
-              var $97 = {};
-              for (var $98 in list) {
-                if ({}.hasOwnProperty.call(list, $98)) {
-                  $97[$98] = list[$98];
+              var $99 = {};
+              for (var $100 in list) {
+                if ({}.hasOwnProperty.call(list, $100)) {
+                  $99[$100] = list[$100];
                 }
                 ;
               }
               ;
-              $97.items = snoc(list.items)(state3.newItem);
-              return $97;
+              $99.items = snoc(list.items)(state3.newItem);
+              return $99;
             })(state3.lists));
           });
           if (v1 instanceof Left) {
-            var $101 = {};
-            for (var $102 in state3) {
-              if ({}.hasOwnProperty.call(state3, $102)) {
-                $101[$102] = state3[$102];
+            var $103 = {};
+            for (var $104 in state3) {
+              if ({}.hasOwnProperty.call(state3, $104)) {
+                $103[$104] = state3[$104];
               }
               ;
             }
             ;
-            $101.latestError = new Just(v1.value0);
-            return $101;
+            $103.latestError = new Just(v1.value0);
+            return $103;
           }
           ;
           if (v1 instanceof Right) {
-            var $105 = {};
-            for (var $106 in state3) {
-              if ({}.hasOwnProperty.call(state3, $106)) {
-                $105[$106] = state3[$106];
+            var $107 = {};
+            for (var $108 in state3) {
+              if ({}.hasOwnProperty.call(state3, $108)) {
+                $107[$108] = state3[$108];
               }
               ;
             }
             ;
-            $105.lists = v1.value0;
-            $105.newItem = "";
-            $105.latestError = Nothing.value;
-            return $105;
+            $107.lists = v1.value0;
+            $107.newItem = "";
+            $107.latestError = Nothing.value;
+            return $107;
           }
           ;
           throw new Error("Failed pattern match at Main (line 240, column 27 - line 253, column 18): " + [v1.constructor.name]);
@@ -7434,16 +7434,16 @@
       ;
       if (v instanceof ChangeNew) {
         return modify_3(function(v1) {
-          var $109 = {};
-          for (var $110 in v1) {
-            if ({}.hasOwnProperty.call(v1, $110)) {
-              $109[$110] = v1[$110];
+          var $111 = {};
+          for (var $112 in v1) {
+            if ({}.hasOwnProperty.call(v1, $112)) {
+              $111[$112] = v1[$112];
             }
             ;
           }
           ;
-          $109.newItem = v.value0;
-          return $109;
+          $111.newItem = v.value0;
+          return $111;
         });
       }
       ;
@@ -7453,48 +7453,70 @@
             return bind32(note("Cannot delete item, selected list index out of range")(index(state3.lists)(listIndex)))(function(oldList) {
               return bind32(note("Cannot delete item, selected item index out of range")(deleteAt(v.value0)(oldList.items)))(function(newItems) {
                 return note("Cannot delete item, selected list index out of range")(modifyAt(listIndex)(function(v2) {
-                  var $113 = {};
-                  for (var $114 in v2) {
-                    if ({}.hasOwnProperty.call(v2, $114)) {
-                      $113[$114] = v2[$114];
+                  var $115 = {};
+                  for (var $116 in v2) {
+                    if ({}.hasOwnProperty.call(v2, $116)) {
+                      $115[$116] = v2[$116];
                     }
                     ;
                   }
                   ;
-                  $113.items = newItems;
-                  return $113;
+                  $115.items = newItems;
+                  return $115;
                 })(state3.lists));
               });
             });
           });
           if (v1 instanceof Left) {
-            var $117 = {};
-            for (var $118 in state3) {
-              if ({}.hasOwnProperty.call(state3, $118)) {
-                $117[$118] = state3[$118];
+            var $119 = {};
+            for (var $120 in state3) {
+              if ({}.hasOwnProperty.call(state3, $120)) {
+                $119[$120] = state3[$120];
               }
               ;
             }
             ;
-            $117.latestError = new Just(v1.value0);
-            return $117;
+            $119.latestError = new Just(v1.value0);
+            return $119;
           }
           ;
           if (v1 instanceof Right) {
-            var $121 = {};
-            for (var $122 in state3) {
-              if ({}.hasOwnProperty.call(state3, $122)) {
-                $121[$122] = state3[$122];
+            var $127 = {};
+            for (var $128 in state3) {
+              if ({}.hasOwnProperty.call(state3, $128)) {
+                $127[$128] = state3[$128];
               }
               ;
             }
             ;
-            $121.lists = v1.value0;
-            $121.latestError = Nothing.value;
-            return $121;
+            $127.lists = v1.value0;
+            $127.latestError = Nothing.value;
+            $127.selectedItem = function() {
+              var v3 = map110(compare2(v.value0))(state3.selectedItem);
+              if (v3 instanceof Nothing) {
+                return Nothing.value;
+              }
+              ;
+              if (v3 instanceof Just && v3.value0 instanceof EQ) {
+                return Nothing.value;
+              }
+              ;
+              if (v3 instanceof Just && v3.value0 instanceof LT) {
+                return map110(function(v4) {
+                  return v4 - 1 | 0;
+                })(state3.selectedItem);
+              }
+              ;
+              if (v3 instanceof Just && v3.value0 instanceof GT) {
+                return state3.selectedItem;
+              }
+              ;
+              throw new Error("Failed pattern match at Main (line 271, column 34 - line 275, column 50): " + [v3.constructor.name]);
+            }();
+            return $127;
           }
           ;
-          throw new Error("Failed pattern match at Main (line 257, column 27 - line 271, column 18): " + [v1.constructor.name]);
+          throw new Error("Failed pattern match at Main (line 257, column 27 - line 276, column 18): " + [v1.constructor.name]);
         }))(function() {
           return writeState1;
         });
@@ -7504,8 +7526,8 @@
         return bind5(get2)(function(state3) {
           var v1 = bind32(note("Cannot choose item, no list selected")(state3.selectedList))(function(index4) {
             return bind32(note("Cannot choose item, selected list index out of range")(index(state3.lists)(index4)))(function(list) {
-              var $126 = length9(list.items) === 0;
-              if ($126) {
+              var $132 = length9(list.items) === 0;
+              if ($132) {
                 return new Left("Cannot choose item, list is empty");
               }
               ;
@@ -7514,70 +7536,70 @@
           });
           if (v1 instanceof Left) {
             return modify_3(function(v2) {
-              var $128 = {};
-              for (var $129 in v2) {
-                if ({}.hasOwnProperty.call(v2, $129)) {
-                  $128[$129] = v2[$129];
+              var $134 = {};
+              for (var $135 in v2) {
+                if ({}.hasOwnProperty.call(v2, $135)) {
+                  $134[$135] = v2[$135];
                 }
                 ;
               }
               ;
-              $128.latestError = new Just(v1.value0);
-              return $128;
+              $134.latestError = new Just(v1.value0);
+              return $134;
             });
           }
           ;
           if (v1 instanceof Right) {
             return bind5(liftEffect7(randomInt(0)(v1.value0 - 1 | 0)))(function(i2) {
               return modify_3(function(v2) {
-                var $132 = {};
-                for (var $133 in v2) {
-                  if ({}.hasOwnProperty.call(v2, $133)) {
-                    $132[$133] = v2[$133];
+                var $138 = {};
+                for (var $139 in v2) {
+                  if ({}.hasOwnProperty.call(v2, $139)) {
+                    $138[$139] = v2[$139];
                   }
                   ;
                 }
                 ;
-                $132.selectedItem = new Just(i2);
-                $132.latestError = Nothing.value;
-                return $132;
+                $138.selectedItem = new Just(i2);
+                $138.latestError = Nothing.value;
+                return $138;
               });
             });
           }
           ;
-          throw new Error("Failed pattern match at Main (line 275, column 5 - line 290, column 18): " + [v1.constructor.name]);
+          throw new Error("Failed pattern match at Main (line 280, column 5 - line 295, column 18): " + [v1.constructor.name]);
         });
       }
       ;
       if (v instanceof SwitchList) {
         return discard23(modify_3(function(state3) {
-          var $136 = v.value0 >= length9(state3.lists);
-          if ($136) {
-            var $137 = {};
-            for (var $138 in state3) {
-              if ({}.hasOwnProperty.call(state3, $138)) {
-                $137[$138] = state3[$138];
+          var $142 = v.value0 >= length9(state3.lists);
+          if ($142) {
+            var $143 = {};
+            for (var $144 in state3) {
+              if ({}.hasOwnProperty.call(state3, $144)) {
+                $143[$144] = state3[$144];
               }
               ;
             }
             ;
-            $137.latestError = new Just("Could not switch to list, index out of range");
-            return $137;
+            $143.latestError = new Just("Could not switch to list, index out of range");
+            return $143;
           }
           ;
-          var $140 = {};
-          for (var $141 in state3) {
-            if ({}.hasOwnProperty.call(state3, $141)) {
-              $140[$141] = state3[$141];
+          var $146 = {};
+          for (var $147 in state3) {
+            if ({}.hasOwnProperty.call(state3, $147)) {
+              $146[$147] = state3[$147];
             }
             ;
           }
           ;
-          $140.selectedList = new Just(v.value0);
-          $140.selectedItem = Nothing.value;
-          $140.newName = Nothing.value;
-          $140.latestError = Nothing.value;
-          return $140;
+          $146.selectedList = new Just(v.value0);
+          $146.selectedItem = Nothing.value;
+          $146.newName = Nothing.value;
+          $146.latestError = Nothing.value;
+          return $146;
         }))(function() {
           return writeState1;
         });
@@ -7585,21 +7607,21 @@
       ;
       if (v instanceof NewList) {
         return discard23(modify_3(function(state3) {
-          var $144 = {};
-          for (var $145 in state3) {
-            if ({}.hasOwnProperty.call(state3, $145)) {
-              $144[$145] = state3[$145];
+          var $150 = {};
+          for (var $151 in state3) {
+            if ({}.hasOwnProperty.call(state3, $151)) {
+              $150[$151] = state3[$151];
             }
             ;
           }
           ;
-          $144.lists = snoc(state3.lists)(newList);
-          $144.selectedList = new Just(length9(state3.lists));
-          $144.newItem = "";
-          $144.newName = Nothing.value;
-          $144.selectedItem = Nothing.value;
-          $144.latestError = Nothing.value;
-          return $144;
+          $150.lists = snoc(state3.lists)(newList);
+          $150.selectedList = new Just(length9(state3.lists));
+          $150.newItem = "";
+          $150.newName = Nothing.value;
+          $150.selectedItem = Nothing.value;
+          $150.latestError = Nothing.value;
+          return $150;
         }))(function() {
           return writeState1;
         });
@@ -7616,7 +7638,7 @@
               return new Right(unit);
             }
             ;
-            throw new Error("Failed pattern match at Main (line 316, column 9 - line 318, column 34): " + [state3.newName.constructor.name]);
+            throw new Error("Failed pattern match at Main (line 321, column 9 - line 323, column 34): " + [state3.newName.constructor.name]);
           }())(function() {
             return bind32(note("Cannot begin rename, no list selected")(state3.selectedList))(function(index4) {
               return bind32(note("Cannot begin rename, selected list index out of range")(index(state3.lists)(index4)))(function(list) {
@@ -7625,65 +7647,65 @@
             });
           });
           if (v1 instanceof Left) {
-            var $150 = {};
-            for (var $151 in state3) {
-              if ({}.hasOwnProperty.call(state3, $151)) {
-                $150[$151] = state3[$151];
+            var $156 = {};
+            for (var $157 in state3) {
+              if ({}.hasOwnProperty.call(state3, $157)) {
+                $156[$157] = state3[$157];
               }
               ;
             }
             ;
-            $150.latestError = new Just(v1.value0);
-            return $150;
+            $156.latestError = new Just(v1.value0);
+            return $156;
           }
           ;
           if (v1 instanceof Right) {
-            var $154 = {};
-            for (var $155 in state3) {
-              if ({}.hasOwnProperty.call(state3, $155)) {
-                $154[$155] = state3[$155];
+            var $160 = {};
+            for (var $161 in state3) {
+              if ({}.hasOwnProperty.call(state3, $161)) {
+                $160[$161] = state3[$161];
               }
               ;
             }
             ;
-            $154.newName = new Just(v1.value0);
-            $154.latestError = Nothing.value;
-            return $154;
+            $160.newName = new Just(v1.value0);
+            $160.latestError = Nothing.value;
+            return $160;
           }
           ;
-          throw new Error("Failed pattern match at Main (line 315, column 5 - line 328, column 14): " + [v1.constructor.name]);
+          throw new Error("Failed pattern match at Main (line 320, column 5 - line 333, column 14): " + [v1.constructor.name]);
         });
       }
       ;
       if (v instanceof ChangeName) {
         return modify_3(function(state3) {
           if (state3.newName instanceof Nothing) {
-            var $159 = {};
-            for (var $160 in state3) {
-              if ({}.hasOwnProperty.call(state3, $160)) {
-                $159[$160] = state3[$160];
+            var $165 = {};
+            for (var $166 in state3) {
+              if ({}.hasOwnProperty.call(state3, $166)) {
+                $165[$166] = state3[$166];
               }
               ;
             }
             ;
-            $159.latestError = new Just("Cannot change name, rename has not begun");
-            return $159;
+            $165.latestError = new Just("Cannot change name, rename has not begun");
+            return $165;
           }
           ;
           if (state3.newName instanceof Just) {
-            var $162 = {};
-            for (var $163 in state3) {
-              if ({}.hasOwnProperty.call(state3, $163)) {
-                $162[$163] = state3[$163];
+            var $168 = {};
+            for (var $169 in state3) {
+              if ({}.hasOwnProperty.call(state3, $169)) {
+                $168[$169] = state3[$169];
               }
               ;
             }
             ;
-            $162.newName = new Just(v.value0);
-            return $162;
+            $168.newName = new Just(v.value0);
+            return $168;
           }
           ;
-          throw new Error("Failed pattern match at Main (line 330, column 5 - line 333, column 47): " + [state3.newName.constructor.name]);
+          throw new Error("Failed pattern match at Main (line 335, column 5 - line 338, column 47): " + [state3.newName.constructor.name]);
         });
       }
       ;
@@ -7692,48 +7714,48 @@
           var v1 = bind32(note("Cannot confirm rename, no list selected")(state3.selectedList))(function(index4) {
             return bind32(note("Cannot confirm rename, rename not started")(state3.newName))(function(newName) {
               return note("Cannot confirm rename, selected list index out of range")(modifyAt(index4)(function(v2) {
-                var $167 = {};
-                for (var $168 in v2) {
-                  if ({}.hasOwnProperty.call(v2, $168)) {
-                    $167[$168] = v2[$168];
+                var $173 = {};
+                for (var $174 in v2) {
+                  if ({}.hasOwnProperty.call(v2, $174)) {
+                    $173[$174] = v2[$174];
                   }
                   ;
                 }
                 ;
-                $167.name = newName;
-                return $167;
+                $173.name = newName;
+                return $173;
               })(state3.lists));
             });
           });
           if (v1 instanceof Left) {
-            var $171 = {};
-            for (var $172 in state3) {
-              if ({}.hasOwnProperty.call(state3, $172)) {
-                $171[$172] = state3[$172];
+            var $177 = {};
+            for (var $178 in state3) {
+              if ({}.hasOwnProperty.call(state3, $178)) {
+                $177[$178] = state3[$178];
               }
               ;
             }
             ;
-            $171.latestError = new Just(v1.value0);
-            return $171;
+            $177.latestError = new Just(v1.value0);
+            return $177;
           }
           ;
           if (v1 instanceof Right) {
-            var $175 = {};
-            for (var $176 in state3) {
-              if ({}.hasOwnProperty.call(state3, $176)) {
-                $175[$176] = state3[$176];
+            var $181 = {};
+            for (var $182 in state3) {
+              if ({}.hasOwnProperty.call(state3, $182)) {
+                $181[$182] = state3[$182];
               }
               ;
             }
             ;
-            $175.lists = v1.value0;
-            $175.newName = Nothing.value;
-            $175.latestError = Nothing.value;
-            return $175;
+            $181.lists = v1.value0;
+            $181.newName = Nothing.value;
+            $181.latestError = Nothing.value;
+            return $181;
           }
           ;
-          throw new Error("Failed pattern match at Main (line 335, column 27 - line 348, column 18): " + [v1.constructor.name]);
+          throw new Error("Failed pattern match at Main (line 340, column 27 - line 353, column 18): " + [v1.constructor.name]);
         }))(function() {
           return writeState1;
         });
@@ -7742,33 +7764,33 @@
       if (v instanceof CancelRename) {
         return modify_3(function(state3) {
           if (state3.newName instanceof Nothing) {
-            var $180 = {};
-            for (var $181 in state3) {
-              if ({}.hasOwnProperty.call(state3, $181)) {
-                $180[$181] = state3[$181];
+            var $186 = {};
+            for (var $187 in state3) {
+              if ({}.hasOwnProperty.call(state3, $187)) {
+                $186[$187] = state3[$187];
               }
               ;
             }
             ;
-            $180.latestError = new Just("Cannot cancel rename, rename has not begun ");
-            return $180;
+            $186.latestError = new Just("Cannot cancel rename, rename has not begun ");
+            return $186;
           }
           ;
           if (state3.newName instanceof Just) {
-            var $183 = {};
-            for (var $184 in state3) {
-              if ({}.hasOwnProperty.call(state3, $184)) {
-                $183[$184] = state3[$184];
+            var $189 = {};
+            for (var $190 in state3) {
+              if ({}.hasOwnProperty.call(state3, $190)) {
+                $189[$190] = state3[$190];
               }
               ;
             }
             ;
-            $183.newName = Nothing.value;
-            $183.latestError = Nothing.value;
-            return $183;
+            $189.newName = Nothing.value;
+            $189.latestError = Nothing.value;
+            return $189;
           }
           ;
-          throw new Error("Failed pattern match at Main (line 351, column 5 - line 357, column 14): " + [state3.newName.constructor.name]);
+          throw new Error("Failed pattern match at Main (line 356, column 5 - line 362, column 14): " + [state3.newName.constructor.name]);
         });
       }
       ;
@@ -7776,29 +7798,29 @@
         return discard23(modify_3(function(state3) {
           var v1 = note("Cannot delete list, index out of range")(deleteAt(v.value0)(state3.lists));
           if (v1 instanceof Left) {
-            var $188 = {};
-            for (var $189 in state3) {
-              if ({}.hasOwnProperty.call(state3, $189)) {
-                $188[$189] = state3[$189];
+            var $194 = {};
+            for (var $195 in state3) {
+              if ({}.hasOwnProperty.call(state3, $195)) {
+                $194[$195] = state3[$195];
               }
               ;
             }
             ;
-            $188.latestError = new Just(v1.value0);
-            return $188;
+            $194.latestError = new Just(v1.value0);
+            return $194;
           }
           ;
           if (v1 instanceof Right) {
-            var $196 = {};
-            for (var $197 in state3) {
-              if ({}.hasOwnProperty.call(state3, $197)) {
-                $196[$197] = state3[$197];
+            var $202 = {};
+            for (var $203 in state3) {
+              if ({}.hasOwnProperty.call(state3, $203)) {
+                $202[$203] = state3[$203];
               }
               ;
             }
             ;
-            $196.lists = v1.value0;
-            $196.selectedList = function() {
+            $202.lists = v1.value0;
+            $202.selectedList = function() {
               var v3 = map110(compare2(v.value0))(state3.selectedList);
               if (v3 instanceof Nothing) {
                 return Nothing.value;
@@ -7818,13 +7840,13 @@
                 return state3.selectedList;
               }
               ;
-              throw new Error("Failed pattern match at Main (line 366, column 34 - line 370, column 50): " + [v3.constructor.name]);
+              throw new Error("Failed pattern match at Main (line 371, column 34 - line 375, column 50): " + [v3.constructor.name]);
             }();
-            $196.latestError = Nothing.value;
-            return $196;
+            $202.latestError = Nothing.value;
+            return $202;
           }
           ;
-          throw new Error("Failed pattern match at Main (line 359, column 27 - line 372, column 18): " + [v1.constructor.name]);
+          throw new Error("Failed pattern match at Main (line 364, column 27 - line 377, column 18): " + [v1.constructor.name]);
         }))(function() {
           return writeState1;
         });
@@ -7832,16 +7854,16 @@
       ;
       if (v instanceof DismissError) {
         return modify_3(function(v1) {
-          var $201 = {};
-          for (var $202 in v1) {
-            if ({}.hasOwnProperty.call(v1, $202)) {
-              $201[$202] = v1[$202];
+          var $207 = {};
+          for (var $208 in v1) {
+            if ({}.hasOwnProperty.call(v1, $208)) {
+              $207[$208] = v1[$208];
             }
             ;
           }
           ;
-          $201.latestError = Nothing.value;
-          return $201;
+          $207.latestError = Nothing.value;
+          return $207;
         });
       }
       ;
@@ -7873,7 +7895,7 @@
         return load3(saveString.value0);
       }
       ;
-      throw new Error("Failed pattern match at Main (line 387, column 17 - line 389, column 29): " + [saveString.constructor.name]);
+      throw new Error("Failed pattern match at Main (line 392, column 17 - line 394, column 29): " + [saveString.constructor.name]);
     }();
     return runHalogenAff(bind42(awaitBody)(runUI2(component1)(state3)))();
   };

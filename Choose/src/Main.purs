@@ -268,6 +268,11 @@ handleAction (DeleteItem itemIndex) = do
             Right newLists -> state
                 { lists = newLists
                 , latestError = Nothing
+                , selectedItem = case compare itemIndex <$> state.selectedItem of
+                    Nothing -> Nothing
+                    Just EQ -> Nothing
+                    Just LT -> (_ - 1) <$> state.selectedItem
+                    Just GT -> state.selectedItem
                 }
     writeState
 handleAction Choose = do
